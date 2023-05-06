@@ -50,8 +50,8 @@ kubeadm init --kubernetes-version=${KUBE_VERSION} --skip-token-print
 mkdir -p ~/.kube
 sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
 
-kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-
+# kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
 sleep 60
 
 echo "untaint controlplane node"
@@ -61,7 +61,7 @@ kubectl get node -o wide
 
 
 echo ".........----------------#################._.-.-Java and MAVEN-.-._.#################----------------........."
-sudo apt install openjdk-8-jdk -y
+sudo apt install openjdk-11-jdk -y
 java -version
 sudo apt install -y maven
 mvn -v
@@ -69,8 +69,15 @@ mvn -v
 
 
 echo ".........----------------#################._.-.-JENKINS-.-._.#################----------------........."
-wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
-sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+# wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+# sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+
 sudo apt update
 sudo apt install -y jenkins
 systemctl daemon-reload
