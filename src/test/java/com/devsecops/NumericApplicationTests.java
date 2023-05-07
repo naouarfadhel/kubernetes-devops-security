@@ -53,7 +53,7 @@ public class NumericApplicationTests {
 /* Correction from PIT-MUTAION report */
     @Test
     public void welcomeMessage() throws Exception {
-         this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(content().string("K8S DEVSECOPS"))
+         this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(content().string("K8S DEVSECOPS"));
     }
 
 }
