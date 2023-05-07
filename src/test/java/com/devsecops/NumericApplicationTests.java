@@ -36,7 +36,7 @@ public class NumericApplicationTests {
 
     @Test
     public void smallerThanOrEqualToFiftyMessage() throws Exception {
-        this.mockMvc.perform(get("/compare/49")).andDo(print()).andExpect(status().isOk())
+        this.mockMvc.perform(get("/compare/50")).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().string("Smaller than or equal to 50"));
     }
 
@@ -52,10 +52,10 @@ public class NumericApplicationTests {
     } */
 /* Correction from PIT-MUTAION report */
 @Test
-public void welcomeMessage() throws Exception {
-     this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk())
-     .andExpect(content().string("K8S DEVSECOPS"));
-}
+    public void welcomeMessage() throws Exception {
+         this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk())
+            .andExpect(content().string("K8S DEVSECOPS"));
+    }
     
 
 }
