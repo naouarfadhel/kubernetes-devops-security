@@ -29,6 +29,11 @@ pipeline {
              }
             }
         }
+      stage('SonarQube - SAST') {
+            steps {
+              sh "mvn clean verify sonar:sonar -Dsonar.projectKey=numeric-application -Dsonar.projectName='numeric-application' -Dsonar.host.url=http://mfnaouar-pfe.eastus.cloudapp.azure.com:9000 -Dsonar.token=sqp_350be401ba8281b6e93a58279bea7bc01769d54e" 
+            }
+        }
       stage('Docker Build & pull') {
             steps {
               /* il faut se connecter avec docker hub via la VM */
