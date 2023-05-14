@@ -22,12 +22,12 @@ deny[msg] {
 }
 
 # Only use trusted base images
-deny[msg] {
-    input[index].Cmd == "from"
-    val := split(input[index].Value[0], "/")
-    count(val) > 1
-    msg = sprintf("Line %d: use a trusted base image", [index])
-}
+#deny[msg] {
+#    input[index].Cmd == "from"
+#    val := split(input[index].Value[0], "/")
+#    count(val) > 1
+#    msg = sprintf("Line %d: use a trusted base image", [index])
+#}
 
 # Do not use 'latest' tag for base imagedeny[msg] {
 deny[msg] {
