@@ -12,22 +12,11 @@ pipeline {
             steps {
               sh "mvn test" 
             }
-            // post {
-            //   always {
-            //     junit 'target/surefire-reports/*.xml'
-            //     jacoco execPattern: 'target/jacoco.exec'
-            //   }
-            // }
         }
       stage('Mutation Tests - PIT') {
            steps {
               sh "mvn org.pitest:pitest-maven:mutationCoverage" 
             }
-            // post {
-            //   always {
-            //     pitmutation mutationStatsFile : '**/target/pit-reports/**/mutations.xml'
-            //  }
-            // }
         }
       stage('SonarQube - SAST') {
             steps {
@@ -41,31 +30,26 @@ pipeline {
               }
             }
         }
-      stage('Vulnerability Scan - Docker') {
-        steps {
-          sh "mvn dependency-check:check"
-        }
-        // post {
-        //   always {
-        //     dependencyCheckPublisher pattern : 'target/dependency-check-report.xml'
-        //   }
-        // }
-      }
       // stage('Vulnerability Scan - Docker') {
       //   steps {
-      //     parallel(
-      //       "Dependency Scan": {
-      //         sh "mvn dependency-check:check"
-      //       },
-      //       "Trivy Scan":{
-      //         sh "bash trivy-docker-image-scan.sh"
-      //       },
-      //       "OPA Conftest":{
-      //         sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
-      //       }
-      //     )
+      //     sh "mvn dependency-check:check"
       //   }
       // }
+      stage('Vulnerability Scan - Docker') {
+        steps {
+          parallel(
+            "Dependency Scan": {
+              sh "mvn dependency-check:check"
+            },
+            "Trivy Scan":{
+              sh "bash trivy-docker-image-scan.sh"
+            },
+            "OPA Conftest":{
+              sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
+            }
+          )
+        }
+      }
       stage('Docker Build & pull') {
             steps {
               /* il faut se connecter avec docker hub via la VM */
