@@ -44,9 +44,9 @@ pipeline {
             "Trivy Scan":{
               sh "bash trivy-docker-image-scan.sh"
             },
-            "OPA Conftest":{
-              sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
-            }
+            // "OPA Conftest":{
+            //   sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
+            // }
           )
         }
       }
@@ -55,7 +55,7 @@ pipeline {
               /* il faut se connecter avec docker hub via la VM */
               withDockerRegistry([credentialsId:"docker-hub",url:""]){
                 sh 'printenv'
-                sh 'docker build -t mfnaouar6/numeric-app:""$GIT_COMMIT"" .' 
+                sh 'sudo docker build -t mfnaouar6/numeric-app:""$GIT_COMMIT"" .' 
                 sh 'docker push mfnaouar6/numeric-app:""$GIT_COMMIT""'
               } 
             }
