@@ -15,38 +15,10 @@ secrets_env = [
 ]
 
 deny[msg] {    
-    dockerenvs := [val | input[index].Cmd == "env"; val := input[index].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    lower(envvar) == secrets_env[_]
-    msg = sprintf("Line %d: Potential secret in ENV key found: %s", [index, envvar])
-}
-
-
-deny[msg] {
-    dockerenvs := [val | input[index].Cmd == "env"; val := input[index].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    startswith(lower(envvar), secrets_env[_])
-    msg = sprintf("Line %d: Potential secret in ENV key found: %s", [i, envvar])
-}
-
-deny[msg] {
-    dockerenvs := [val | input[index].Cmd == "env"; val := input[index].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    endswith(lower(envvar), secrets_env[_])
-    msg = sprintf("Line %d: Potential secret in ENV key found: %s", [index, envvar])
-}
-
-deny[msg] {
-    dockerenvs := [val | input[index].Cmd == "env"; val := input[index].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    parts := regex.split("[ :=_-]", envvar)
-    part := parts[_]
-    lower(part) == secrets_env[_]
-    msg = sprintf("Line %d: Potential secret in ENV key found: %s", [index, envvar])
+    input[index].Cmd == "env"
+    val := input[index].Value
+    contains(lower(val[_]), secrets_env[_])
+    msg = sprintf("Line %d: Potential secret in ENV key found: %s", [index, val])
 }
 
 # Only use trusted base images
@@ -61,7 +33,7 @@ deny[msg] {
 deny[msg] {
     input[index].Cmd == "from"
     val := split(input[index].Value[0], ":")
-    contains(lower(val[1]), "latest")
+    contains(lower(val[index]), "latest")
     msg = sprintf("Line %d: do not use 'latest' tag for base images", [index])
 }
 
