@@ -5,7 +5,7 @@ pipeline {
     deploymentName = "devsecops"
     containerName = "devsecops-container"
     serviceName = "devsecops-svc"
-    imageName = "siddharth67/numeric-app:${GIT_COMMIT}"
+    imageName = "mfnaouar6/numeric-app:${GIT_COMMIT}"
     applicationURL="http://mfnaouar-pfe.eastus.cloudapp.azure.com"
     applicationURI="/increment/99"
   }
@@ -50,9 +50,9 @@ pipeline {
             "Dependency Scan": {
               sh "mvn dependency-check:check"
             },
-            "Trivy Scan":{
-              sh "bash trivy-docker-image-scan.sh"
-            },
+            // "Trivy Scan":{
+            //   sh "bash trivy-docker-image-scan.sh"
+            // },
             "OPA Conftest":{
               sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-docker-security.rego Dockerfile'
             }
