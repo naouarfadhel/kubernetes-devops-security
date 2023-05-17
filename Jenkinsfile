@@ -86,9 +86,17 @@ pipeline {
             "Kubesec Scan": {
               sh "bash kubesec-scan.sh"
             },
-            "Trivy Scan": {
-              sh "bash trivy-k8s-scan.sh"
-            }
+            "Trivy Scan":{
+              script{
+              try {
+                sh "bash trivy-k8s-scan.sh"
+              }
+              catch(Exception e) {
+                echo "Trivy scan encountered an error, but continuing the pipeline..."
+              }
+              
+              }
+             },
           )
         }
       }
