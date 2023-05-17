@@ -9,7 +9,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-            .csrf().disable();
+        @SuppressWarnings("squid:S4430")
+        http.csrf().disable();
     }
 }
