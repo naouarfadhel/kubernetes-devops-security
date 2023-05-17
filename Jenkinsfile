@@ -88,34 +88,51 @@ pipeline {
             },
             "Trivy Scan":{
               script{
-              try {
-                sh "bash trivy-k8s-scan.sh"
-              }
-              catch(Exception e) {
-                echo "Trivy scan encountered an error, but continuing the pipeline..."
-              }
+                try {
+                  sh "bash trivy-k8s-scan.sh"
+                }
+                catch(Exception e) {
+                  echo "Trivy scan encountered an error, but continuing the pipeline..."
+                }
               
               }
-             },
+            },
           )
         }
       }
-    stage('K8S Deployment - DEV') {
-      steps {
-        parallel(
-          "Deployment": {
-            withKubeConfig([credentialsId: 'kubeconf']) {
-              sh "bash k8s-deployment.sh"
+      stage('K8S Deployment - DEV') {
+        steps {
+          parallel(
+            "Deployment": {
+              withKubeConfig([credentialsId: 'kubeconf']) {
+                sh "bash k8s-deployment.sh"
+              }
+            },
+            "Rollout Status": {
+              withKubeConfig([credentialsId: 'kubeconf']) {
+                sh "bash k8s-deployment-rollout-status.sh"
+              }
             }
-          },
-          "Rollout Status": {
-            withKubeConfig([credentialsId: 'kubeconf']) {
-              sh "bash k8s-deployment-rollout-status.sh"
+          )
+        }
+      }
+      stage('Integration Tests - DEV') {
+        steps {
+          script {
+            try {
+              withKubeConfig([credentialsId: 'kubeconf']) {
+                sh "bash integration-test.sh"
+              }
+            } catch (e) {
+              withKubeConfig([credentialsId: 'kubeconf']) {
+                sh "kubectl -n default rollout undo deploy ${deploymentName}"
+              }
+              throw e
             }
           }
-        )
+        }
       }
-    }
+
       // stage('K8S Deployment - DEV') {
       //       steps {
       //         withKubeConfig([credentialsId: 'kubeconf']) {
