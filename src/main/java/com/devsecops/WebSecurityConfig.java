@@ -9,8 +9,8 @@ import com.sun.xml.ws.developer.JAXWSProperties;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
+    @SuppressWarnings("squid:S4430")
     protected void configure(HttpSecurity http) throws Exception {
-        @SuppressWarnings("squid:S4430")
 
         http.csrf().disable();
     }
