@@ -140,6 +140,33 @@ pipeline {
           }
         }
       }
+      stage('Prompt to PROD?'){
+        steps {
+          timeout(time: 2, unit: 'DAYS'){
+            input 'Do you want to approve the deployment to PROD environment/Namespace?'
+          }
+        }
+      }
+
+      stage('K8S CIS Benchmark') {
+        steps {
+          script {
+
+            parallel(
+              "Master": {
+                sh "bash cis-master.sh"
+              },
+              "Etcd": {
+                sh "bash cis-etcd.sh"
+              },
+              "Kubelet": {
+                sh "bash cis-kubelet.sh"
+              }
+            )
+
+          }
+        }
+      }
 
       // stage('K8S Deployment - DEV') {
       //       steps {
