@@ -147,7 +147,7 @@ pipeline {
       stage('Prompt to PROD?'){
         steps {
           timeout(time: 2, unit: 'DAYS'){
-            input 'Do you want to approve the deployment to PROD environment/Namespace?'
+            input 'Do you want to approve the deployment to PROD environment/Namespace besh tsalak\'ha?'
           }
         }
       }
