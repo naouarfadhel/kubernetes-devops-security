@@ -18,16 +18,19 @@ pipeline {
               archive 'target/*.jar' 
             }
         }
+
       stage('Unit Tests - Juint & JaCoCo') {
             steps {
               sh "mvn test" 
             }
         }
+
       stage('Mutation Tests - PIT') {
            steps {
               sh "mvn org.pitest:pitest-maven:mutationCoverage" 
             }
         }
+
       stage('SonarQube - SAST') {
             steps {
               withSonarQubeEnv('SonarQube'){
@@ -40,11 +43,7 @@ pipeline {
               }
             }
         }
-      // stage('Vulnerability Scan - Docker') {
-      //   steps {
-      //     sh "mvn dependency-check:check"
-      //   }
-      // }
+
       stage('Vulnerability Scan - Docker') {
         steps {
           parallel(
@@ -68,6 +67,7 @@ pipeline {
           )
         }
       }
+
       stage('Docker Build & pull') {
             steps {
               /* il faut se connecter avec docker hub via la VM */
@@ -78,6 +78,7 @@ pipeline {
               } 
             }
         }
+
       stage('Vulnerability Scan - Kubernetes') {
         steps {
           parallel(
@@ -101,6 +102,7 @@ pipeline {
           )
         }
       }
+
       stage('K8S Deployment - DEV') {
         steps {
           parallel(
@@ -117,6 +119,7 @@ pipeline {
           )
         }
       }
+
       stage('Integration Tests - DEV') {
         steps {
           script {
@@ -133,6 +136,7 @@ pipeline {
           }
         }
       }
+
       stage('OWASP ZAP - DAST') {
         steps {
           withKubeConfig([credentialsId: 'kubeconf']) {
@@ -168,6 +172,50 @@ pipeline {
         }
       }
 
+      stage('K8S Deployment - PROD') {
+        steps {
+          parallel(
+            "Deployment": {
+              withKubeConfig([credentialsId: 'kubeconf']) {
+                sh "sed -i 's#replace#${imageName}#g' k8s_PROD-deployment_service.yaml"
+                sh "kubectl -n prod apply -f k8s_PROD-deployment_service.yaml"
+              }
+            },
+            "Rollout Status": {
+              withKubeConfig([credentialsId: 'kubeconf']) {
+                sh "bash k8s-PROD-deployment-rollout-status.sh"
+              }
+            }
+          )
+        }
+      }
+
+        
+}
+post {
+  always {
+    junit 'target/surefire-reports/*.xml'
+    jacoco execPattern: 'target/jacoco.exec'
+    pitmutation mutationStatsFile : '**/target/pit-reports/**/mutations.xml'
+    dependencyCheckPublisher pattern : 'target/dependency-check-report.xml'
+    publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'owasp-zap-report', reportFiles: 'zap_report.html', reportName: 'OWASP ZAP HTML Report', reportTitles: 'OWASP ZAP HTML Report'])
+    sendNotification currentBuild.result
+    }
+  }
+}
+
+
+
+
+
+      // stage('Vulnerability Scan - Docker') {
+      //   steps {
+      //     sh "mvn dependency-check:check"
+      //   }
+      // }
+
+
+
       // stage('K8S Deployment - DEV') {
       //       steps {
       //         withKubeConfig([credentialsId: 'kubeconf']) {
@@ -176,16 +224,3 @@ pipeline {
       //         }
       //       }
       //   }
-        
-    }
-  post {
-    always {
-      junit 'target/surefire-reports/*.xml'
-      jacoco execPattern: 'target/jacoco.exec'
-      pitmutation mutationStatsFile : '**/target/pit-reports/**/mutations.xml'
-      dependencyCheckPublisher pattern : 'target/dependency-check-report.xml'
-      publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'owasp-zap-report', reportFiles: 'zap_report.html', reportName: 'OWASP ZAP HTML Report', reportTitles: 'OWASP ZAP HTML Report'])
-      sendNotification currentBuild.result
-    }
-  }
-}
