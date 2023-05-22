@@ -94,7 +94,7 @@ pipeline {
                   sh "bash trivy-k8s-scan.sh"
                 }
                 catch(Exception e) {
-                  echo "Trivy scan encountered an error, but continuing the pipeline..."
+                  echo "Trivy scan encountered an error, but continuing the pipeline Just for Arwa..."
                 }
               
               }
